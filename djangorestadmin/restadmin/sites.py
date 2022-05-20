@@ -32,12 +32,20 @@ class AdminSite:
             if model._meta.abstract:
                 raise ImproperlyConfigured(
                     f"The model {model.__name__} is abstract. It cannot be registered with admin")
+
+            if model in self._registry:
+                raise AlreadyRegistered(f"The model {model.__name__} has already been registered")
             self._registry[model] = admin_class(model, self)
+
+
 
     def get_registry(self):
         return self._registry
 
     def get_urls(self):
+        url_patterns = []
+        for model, admin_site in self._registry.items():
+            pass
         pass
 
     def is_registered(self, model):
