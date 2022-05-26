@@ -1,6 +1,6 @@
 from django.db.models.base import ModelBase
 from django.core.exceptions import ImproperlyConfigured
-from rest_framework import serializers, viewsets, routers
+from rest_framework import serializers, viewsets, routers, permissions
 
 
 class AlreadyRegistered(Exception):
@@ -21,7 +21,8 @@ class AdminSite:
         self._registry = {}
         self.admin_router = routers.DefaultRouter()
 
-    def register(self, model_or_iterable, serializer=None):
+    def register(self, model_or_iterable, serializer: serializers.ModelSerializer = None,
+                 permission_class: list = None):
         """
         Register Models to the AdminSite. Generates a serializer or uses the one passed.
         """
@@ -46,14 +47,15 @@ class AdminSite:
                         'fields': '__all__'
                     })
                 })
-
+            permission_class = permission_class or [permissions.IsAdminUser]
             viewset = type(f"{model_name}ViewSet", (viewsets.ModelViewSet,), {
                 'queryset': model.objects.all(),
-                #  TODO: permissions, pagination
+                'permission_classes': permission_class,
+                #  TODO: pagination
                 'serializer_class': serializer_class,
             })
             self._registry[model] = viewset
-    #         TODO: register to router here or in get_urls method
+            #
             self.admin_router.register(f"{model._meta.app_label}/{model_name}", viewset, f"admin_{model_name}")
 
     def get_registry(self):
@@ -73,4 +75,3 @@ class AdminSite:
         Check If a model is registered
         """
         return model in self._registry
-
