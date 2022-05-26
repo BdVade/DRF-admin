@@ -23,7 +23,7 @@ class AdminSite:
         self.admin_router = routers.DefaultRouter()
 
     def register(self, model_or_iterable, serializer: serializers.ModelSerializer = None,
-                 permission_class: list = None, pagination_class = None):
+                 permission_class: list = None, pagination_class=None):
         """
         Register Models to the AdminSite. Generates a serializer or uses the one passed.
         """
@@ -79,3 +79,6 @@ class AdminSite:
         Check If a model is registered
         """
         return model in self._registry
+
+
+site = AdminSite()
