@@ -1,8 +1,10 @@
-from django.core.management import call_command
+#!/usr/bin/env python
 
-from boot_django import boot_django
+from django.core.management import call_command
+from utils.boot_django import boot_django
+
 
 # call the django setup routine
 boot_django()
 
-call_command("migrate")
+call_command("shell")
