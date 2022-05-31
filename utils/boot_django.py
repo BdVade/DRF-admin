@@ -21,7 +21,7 @@ def boot_django():
         },
         INSTALLED_APPS=(
             "restadmin",
-            "rest_framework"
+            "rest_framework",
         ),
         TIME_ZONE="UTC",
         USE_TZ=True,
