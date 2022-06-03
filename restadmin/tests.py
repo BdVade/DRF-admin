@@ -6,7 +6,7 @@ from restadmin.models import TestModel, TestAbstractModel, SecondTestModel
 from restadmin.serializers import AdminSerializer
 from restadmin.permissions import ReadOnly
 from restadmin.pagination import LargeResultsSetPagination
-from restadmin.sites import AdminSite, AlreadyRegistered
+from restadmin.sites import AdminSite, AlreadyRegistered, NotRegistered
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -20,11 +20,15 @@ class TestRegistration(APITestCase):
     def test_plain_registration(self):
         self.site.register(TestModel)
         self.assertTrue(issubclass(self.site._registry[TestModel], ModelViewSet))
+        viewset = self.site._registry[TestModel]
         self.site.unregister(TestModel)
-        # check if unregistered from router
-        registry_viewset_objects = [registry_object[0]for registry_object in self.site.admin_router.registry]
-        self.assertFalse(self.site._registry[TestModel] in registry_viewset_objects)
+        registry_viewset_objects = [registry_object[0] for registry_object in self.site.admin_router.registry]
+        self.assertFalse(viewset in registry_viewset_objects)
         self.assertEqual(self.site._registry, {})
+
+    def test_unregistering_unregistered_model(self):
+        with self.assertRaises(NotRegistered):
+            self.site.unregister(TestModel)
 
     def test_prevent_double_registration(self):
         self.site.register(TestModel)
