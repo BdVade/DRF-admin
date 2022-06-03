@@ -83,5 +83,17 @@ class AdminSite:
         """
         return model in self._registry
 
+    def unregister(self, model):
+        """
+        Check if the model is in our registry first, Then delete the viewset object from the router registry,
+        Then delete from our registry
+        """
+        model_name = model.__name__
+        if model not in self._registry:
+            raise NotRegistered(f"The model {model_name} has not been registered")
+        viewset = self._registry[model]
+        self.admin_router.registry.remove((f"{model._meta.app_label}/{model_name}", viewset, f"admin_{model_name}"))
+        del self._registry[model]
+
 
 site = AdminSite()
