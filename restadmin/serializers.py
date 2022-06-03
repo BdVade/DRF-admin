@@ -5,3 +5,4 @@ class AdminSerializer(ModelSerializer):
     class Meta:
         model = None
         fields = "__all__"
+

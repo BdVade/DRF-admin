@@ -9,4 +9,8 @@ class TestAbstractModel(models.Model):
 
 
 class TestModel(TestAbstractModel):
-    age = models.IntegerField
+    age = models.IntegerField()
+
+
+class SecondTestModel(TestAbstractModel):
+    age = models.IntegerField()
