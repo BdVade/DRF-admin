@@ -84,4 +84,5 @@ class AdminSite:
         return model in self._registry
 
 
+
 site = AdminSite()

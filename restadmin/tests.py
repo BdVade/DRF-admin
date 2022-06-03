@@ -20,9 +20,11 @@ class TestRegistration(APITestCase):
     def test_plain_registration(self):
         self.site.register(TestModel)
         self.assertTrue(issubclass(self.site._registry[TestModel], ModelViewSet))
-
-        # self.site.unregister(TestModel)
-        # self.assertEqual(self.site._registry, {})
+        self.site.unregister(TestModel)
+        # check if unregistered from router
+        registry_viewset_objects = [registry_object[0]for registry_object in self.site.admin_router.registry]
+        self.assertFalse(self.site._registry[TestModel] in registry_viewset_objects)
+        self.assertEqual(self.site._registry, {})
 
     def test_prevent_double_registration(self):
         self.site.register(TestModel)
