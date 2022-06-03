@@ -2,6 +2,8 @@ from django.db.models.base import ModelBase
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers, viewsets, routers, permissions
 from rest_framework.settings import api_settings
+from rest_framework.permissions import BasePermission
+from typing import Type, List
 
 
 class AlreadyRegistered(Exception):
@@ -22,8 +24,9 @@ class AdminSite:
         self._registry = {}
         self.admin_router = routers.DefaultRouter()
 
-    def register(self, model_or_iterable, serializer: serializers.ModelSerializer = None,
-                 permission_class: list = None, pagination_class=None):
+    def register(self, model_or_iterable, serializer: Type[serializers.ModelSerializer] = None,
+                 permission_classes: List[Type[BasePermission]] = None, pagination_class=None):
+        # TODO: proper Type Hinting here
         """
         Register Models to the AdminSite. Generates a serializer or uses the one passed.
         """
@@ -49,7 +52,7 @@ class AdminSite:
                     })
                 })
 
-            generated_viewset_permission_class = permission_class or [permissions.IsAdminUser]
+            generated_viewset_permission_class = permission_classes or [permissions.IsAdminUser]
             generated_viewset_pagination_class = pagination_class or api_settings.DEFAULT_PAGINATION_CLASS
 
             viewset = type(f"{model_name}ViewSet", (viewsets.ModelViewSet,), {
