@@ -24,6 +24,7 @@ E.g
 ```
 REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
 ```
+Run your server and you can find the documentation at ` http://127.0.0.1:8000/restadmin-docs`
 ## Tests
 To run the tests:
 

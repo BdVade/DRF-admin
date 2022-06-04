@@ -99,7 +99,6 @@ class AdminSite:
     @property
     def docs(self):
         urls = self.urls
-        print(urls)
         return include_docs_urls(title="RestAdmin Endpoints Documentation", public=True, patterns=urls[0])
 
 
