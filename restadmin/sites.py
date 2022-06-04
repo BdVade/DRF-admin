@@ -3,6 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers, viewsets, routers, permissions
 from rest_framework.settings import api_settings
 from rest_framework.permissions import BasePermission
+from rest_framework.documentation import include_docs_urls
 from typing import Type, List
 
 
@@ -75,7 +76,7 @@ class AdminSite:
 
     @property
     def urls(self):
-        return self.admin_router.urls
+        return self.admin_router.urls, "restadmin", "restadmin"
 
     def is_registered(self, model):
         """
@@ -94,6 +95,12 @@ class AdminSite:
         viewset = self._registry[model]
         self.admin_router.registry.remove((f"{model._meta.app_label}/{model_name}", viewset, f"admin_{model_name}"))
         del self._registry[model]
+
+    @property
+    def docs(self):
+        urls = self.urls
+        print(urls)
+        return include_docs_urls(title="RestAdmin Endpoints Documentation", public=True, patterns=urls[0])
 
 
 site = AdminSite()
