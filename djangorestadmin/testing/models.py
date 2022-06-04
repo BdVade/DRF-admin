@@ -1,0 +1,19 @@
+from django.db import models
+
+# Create your models here.
+from django.db import models
+
+
+class TestAbstractModel(models.Model):
+    name = models.CharField(max_length=10)
+
+    class Meta:
+        abstract = True
+
+
+class TestModel(TestAbstractModel):
+    age = models.IntegerField()
+
+
+class SecondTestModel(TestAbstractModel):
+    age = models.IntegerField()
