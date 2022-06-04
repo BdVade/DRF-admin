@@ -1,4 +1,4 @@
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, override_settings
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.settings import api_settings
@@ -8,6 +8,8 @@ from tests.permissions import ReadOnly
 from tests.pagination import LargeResultsSetPagination
 from restadmin.sites import AdminSite, AlreadyRegistered, NotRegistered
 from django.core.exceptions import ImproperlyConfigured
+from django.urls import path, reverse
+from django.test.client import RequestFactory
 
 
 # Create your tests here.
@@ -80,3 +82,6 @@ class TestRegistration(APITestCase):
         self.assertEqual(self.site._registry[TestModel].pagination_class, api_settings.DEFAULT_PAGINATION_CLASS)
 
 
+class TestViewSets(APITestCase):
+    def test_docs_generation(self):
+        pass
