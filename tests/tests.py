@@ -2,10 +2,10 @@ from rest_framework.test import APITestCase
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.settings import api_settings
-from restadmin.models import TestModel, TestAbstractModel, SecondTestModel
-from restadmin.serializers import AdminSerializer
-from restadmin.permissions import ReadOnly
-from restadmin.pagination import LargeResultsSetPagination
+from tests.models import TestModel, TestAbstractModel, SecondTestModel
+from tests.serializers import AdminSerializer
+from tests.permissions import ReadOnly
+from tests.pagination import LargeResultsSetPagination
 from restadmin.sites import AdminSite, AlreadyRegistered, NotRegistered
 from django.core.exceptions import ImproperlyConfigured
 
@@ -78,3 +78,5 @@ class TestRegistration(APITestCase):
     def test_default_pagination_class_registration(self):
         self.site.register(TestModel)
         self.assertEqual(self.site._registry[TestModel].pagination_class, api_settings.DEFAULT_PAGINATION_CLASS)
+
+

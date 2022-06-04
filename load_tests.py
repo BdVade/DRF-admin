@@ -4,7 +4,7 @@ from unittest import TestSuite
 
 boot_django()
 
-default_labels = ["restadmin.tests", ]
+default_labels = ["tests.tests", ]
 
 
 def get_suite(labels=default_labels):
