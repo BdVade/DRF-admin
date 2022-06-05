@@ -84,27 +84,23 @@ class TestRegistration(APITestCase):
         self.assertEqual(self.site._registry[TestModel].pagination_class, api_settings.DEFAULT_PAGINATION_CLASS)
 
 
-
-
 site = AdminSite()
 
-@override_settings(ROOT_URLCONF="tests.tests")
-class TestViewSets(APITestCase, URLPatternsTestCase):
 
+# @override_settings(ROOT_URLCONF="tests.tests")
+class TestViewSets(URLPatternsTestCase):
+    databases = '__all__'
     urlpatterns = [
         path("test_admin/", site.urls),
         path("admin-docs/", site.docs)
 
     ]
 
-    @classmethod
-    def setUpTestData(cls):
-        cls.superuser = User.objects.create_superuser(
-            username="super", password="secret", email="super@example.com"
-        )
-
     def setUp(self) -> None:
-        self.client.force_login(self.superuser)
+        # self.superuser = User.objects.create_superuser(
+        #     username="super", password="secret", email="super@example.com"
+        # )
+        # self.client.force_login(self.superuser)
         site.register(TestModel)
 
     def test_docs_generation(self):
