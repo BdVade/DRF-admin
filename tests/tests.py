@@ -1,4 +1,4 @@
-from rest_framework.test import APITestCase, override_settings
+from rest_framework.test import APITestCase, override_settings, APIRequestFactory, URLPatternsTestCase
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.settings import api_settings
@@ -9,6 +9,8 @@ from tests.pagination import LargeResultsSetPagination
 from restadmin.sites import AdminSite, AlreadyRegistered, NotRegistered
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import path, reverse
+from django.contrib.auth.models import User
+from django.template.response import TemplateResponse
 from django.test.client import RequestFactory
 
 
@@ -82,6 +84,33 @@ class TestRegistration(APITestCase):
         self.assertEqual(self.site._registry[TestModel].pagination_class, api_settings.DEFAULT_PAGINATION_CLASS)
 
 
-class TestViewSets(APITestCase):
+
+
+site = AdminSite()
+
+@override_settings(ROOT_URLCONF="tests.tests")
+class TestViewSets(APITestCase, URLPatternsTestCase):
+
+    urlpatterns = [
+        path("test_admin/", site.urls),
+        path("admin-docs/", site.docs)
+
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.superuser = User.objects.create_superuser(
+            username="super", password="secret", email="super@example.com"
+        )
+
+    def setUp(self) -> None:
+        self.client.force_login(self.superuser)
+        site.register(TestModel)
+
     def test_docs_generation(self):
-        pass
+        docs_url = reverse("api-docs:docs-index")
+        print(docs_url)
+        response = self.client.get(docs_url)
+        print(response.headers)
+        print(response.data)
+        self.assertEqual(response.status_code, 200)
