@@ -13,6 +13,26 @@ A project to generate admin endpoints for models
 - Call `restadmin.site.register(Model)` Model being the model to register 
 - Add rest admin to your urls.py file 
 
+## Prerequisite
+- rest_framework should be properly set up to use this package hitch free
+
+A sample of it's configuration in the settings file:
+```python
+ REST_FRAMEWORK={
+            'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+            'TEST_REQUEST_RENDERER_CLASSES': [
+                'rest_framework.renderers.MultiPartRenderer',
+                'rest_framework.renderers.JSONRenderer',
+                'rest_framework.renderers.TemplateHTMLRenderer', ],
+            "DEFAULT_AUTHENTICATION_CLASSES": [
+                'rest_framework.authentication.SessionAuthentication',
+                'rest_framework.authentication.BasicAuthentication'
+            ],
+            "DEFAULT_PERMISSION_CLASSES": [
+                'rest_framework.permissions.AllowAny',
+            ]
+        }
+```
 
 For example: 
 
@@ -44,6 +64,19 @@ urlpatterns = [
     path('restadmin/', site.urls),
     ...
 ]
+```
+
+## Customization
+This package allows you to specify the following when registering your model
+- `serializer`: A Model Serializer Class
+- ` permission_classes`: A list of Permission classes
+- `pagination_classs`: A Pagination Class
+
+An example of how a call to the register method with all 3 would look is :
+```python
+restadmin.site.register(TestModel, serializer=AdminSerializer, permission_classes=[ReadOnly], 
+                        pagination_class=LargeResultsSetPagination)
+
 ```
 
 ## Endpoint Documentation
