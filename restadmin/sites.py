@@ -27,7 +27,6 @@ class AdminSite:
 
     def register(self, model_or_iterable, serializer: Type[serializers.ModelSerializer] = None,
                  permission_classes: List[Type[BasePermission]] = None, pagination_class=None):
-        # TODO: proper Type Hinting here
         """
         Register Models to the AdminSite. Generates a serializer or uses the one passed.
         """
@@ -76,6 +75,10 @@ class AdminSite:
 
     @property
     def urls(self):
+        """
+
+        :return: the router urlconf object, appname, and url namespace
+        """
         return self.admin_router.urls, "restadmin", "restadmin"
 
     def is_registered(self, model):
@@ -99,7 +102,8 @@ class AdminSite:
     @property
     def docs(self):
         urls = self.urls
-        return include_docs_urls(title="RestAdmin Endpoints Documentation", public=True, patterns=urls[0])
+        return include_docs_urls(title="RestAdmin Endpoints Documentation", public=True, patterns=urls[0],
+                                 permission_classes=[permissions.IsAdminUser])
 
 
 site = AdminSite()

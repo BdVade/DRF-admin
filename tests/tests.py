@@ -12,6 +12,7 @@ from django.urls import path, reverse
 from django.contrib.auth.models import User
 from django.template.response import TemplateResponse
 from django.test.client import RequestFactory
+import pdb
 
 
 # Create your tests here.
@@ -85,28 +86,66 @@ class TestRegistration(APITestCase):
 
 
 site = AdminSite()
+site.register(TestModel)
+
+urlpatterns = [
+    path("test_admin/", site.urls),
+    path("admin-docs/", site.docs)
+
+]
 
 
-# @override_settings(ROOT_URLCONF="tests.tests")
-class TestViewSets(URLPatternsTestCase):
-    databases = '__all__'
-    urlpatterns = [
-        path("test_admin/", site.urls),
-        path("admin-docs/", site.docs)
-
-    ]
-
-    def setUp(self) -> None:
-        # self.superuser = User.objects.create_superuser(
-        #     username="super", password="secret", email="super@example.com"
-        # )
-        # self.client.force_login(self.superuser)
-        site.register(TestModel)
+@override_settings(ROOT_URLCONF="tests.tests")
+class TestViewSets(APITestCase):
+    def setUp(self):
+        self.superuser = User.objects.create_superuser(
+            username="super", password="secret", email="super@example.com"
+        )
+        self.client.force_login(self.superuser)
 
     def test_docs_generation(self):
         docs_url = reverse("api-docs:docs-index")
-        print(docs_url)
         response = self.client.get(docs_url)
-        print(response.headers)
-        print(response.data)
+        self.assertIn("TestModel", response.data)
         self.assertEqual(response.status_code, 200)
+
+    def test_list_model_objects(self):
+        url = reverse("restadmin:admin_TestModel-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_model_endpoint(self):
+        url = reverse("restadmin:admin_TestModel-list")
+        response = self.client.post(url, data={"name": "name", "age": 16})
+        self.assertEqual(TestModel.objects.count(), 1)
+        self.assertEqual(response.status_code, 201)
+
+    def test_update_model_endpoint(self):
+        model_object = TestModel.objects.create(name="name1", age=5)
+        url = reverse("restadmin:admin_TestModel-detail", args=(model_object.id,))
+        response = self.client.put(url, data={"name": "name2", "age": 15})
+        new_object = TestModel.objects.get(id=model_object.id)
+        self.assertEqual(new_object.age, 15)
+        self.assertEqual(new_object.name, "name2")
+
+    def test_partial_update_model_endpoint(self):
+        model_object = TestModel.objects.create(name="name1", age=5)
+        url = reverse("restadmin:admin_TestModel-detail", args=(model_object.id,))
+        response = self.client.patch(url, data={"age": 15})
+        new_object = TestModel.objects.get(id=model_object.id)
+        self.assertEqual(new_object.age, 15)
+
+
+    def test_get_model_endpoint(self):
+        model_object = TestModel.objects.create(name="name1", age=5)
+        url = reverse("restadmin:admin_TestModel-detail", args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_delete_model_endpoint(self):
+        model_object = TestModel.objects.create(name="name1", age=5)
+        self.assertEqual(TestModel.objects.count(), 1)
+        url = reverse("restadmin:admin_TestModel-detail", args=(1,))
+        response = self.client.delete(url)
+        self.assertEqual(TestModel.objects.count(), 0)

@@ -60,6 +60,7 @@ def boot_django():
 
         DEFAULT_AUTO_FIELD='django.db.models.BigAutoField',
 
+        STATIC_URL='static/',
         TEMPLATES=[
             {
                 'BACKEND': 'django.template.backends.django.DjangoTemplates',
