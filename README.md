@@ -62,13 +62,15 @@ urlpatterns = [
 ]
 ```
 
-Using this would require you to have your default schema Class set in your REST_FRAMWORK config in your settings.py file
+
+Using this would require you to have your default schema Class set in your REST_FRAMEWORK config in your settings.py file
 E.g
 
 ```
 REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
 ```
 Run your server and you can find the documentation at ` http://127.0.0.1:8000/restadmin-docs`
+NOTE: The Documentation page is restricted to staff only(is_staff has to be True)
 ## Tests
 To run the tests:
 
