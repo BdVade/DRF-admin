@@ -1,5 +1,5 @@
-# DjangoRestAdmin
-A project to generate admin endpoints for models
+# DRF-Admin
+A package to generate CRUD endpoints for registered models with the Django-REST Framework. 
 
 ## Requirements
 - [Django](https://docs.djangoproject.com/en/4.0/)
@@ -8,7 +8,7 @@ A project to generate admin endpoints for models
 ## Installation
 To install run:
 
-`pip install django-rest-admin`
+`pip install drf-admin`
 
 ## Usage
 - Import restadmin in the admin.py 

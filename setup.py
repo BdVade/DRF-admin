@@ -10,9 +10,9 @@ README = response.text
 # The text of the README file
 # README = (HERE / "README.md").read_text()
 setup(
-    name="django-rest-admin",
-    version="0.0.1",
-    description="A Project to generate Admin Endpoints for a platform",
+    name="drf-admin",
+    version="0.1.0",
+    description="A package to generate CRUD endpoints for registered models with the Django-REST Framework.",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/BdVade/DjangoRestAdmin/",
