@@ -6,7 +6,9 @@ A project to generate admin endpoints for models
 - [Django Rest Framework](https://www.django-rest-framework.org/)
 
 ## Installation
+To install run:
 
+`pip install django-rest-admin`
 
 ## Usage
 - Import restadmin in the admin.py 
