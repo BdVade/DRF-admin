@@ -1,4 +1,4 @@
-# DjangoRestAdmin
+# DRF-Admin
 A package to generate CRUD endpoints for registered models with the Django-REST Framework. 
 
 ## Requirements
