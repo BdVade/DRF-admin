@@ -6,7 +6,7 @@ on:
         branches: [ release ]
 
 jobs:
-    build:
+    build-and-publish:
         name: Build and publish Python distribution
         runs-on: ubuntu-18.04
         steps:
