@@ -2,7 +2,7 @@ name: Publish Python distributions to PyPI
 
 on:
 
-    pull_request:
+    push:
         branches: [ release ]
 
 jobs:
