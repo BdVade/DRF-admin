@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 .idea
+
+# VSCode specific settings
+.vscode
