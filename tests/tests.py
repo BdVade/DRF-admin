@@ -61,7 +61,7 @@ class TestRegistration(APITestCase):
         self.assertTrue(issubclass(self.site._registry[SecondTestModel], ModelViewSet))
 
     def test_custom_serializer_registration(self):
-        self.site.register(TestModel, serializer=AdminSerializer)
+        self.site.register(TestModel, serializer_or_modeladmin=AdminSerializer)
         self.assertEqual(self.site._registry[TestModel].serializer_class, AdminSerializer)
 
     def test_custom_permission_class_registration(self):
