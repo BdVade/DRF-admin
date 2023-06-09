@@ -4,7 +4,9 @@ from rest_framework import serializers, viewsets, routers, permissions
 from rest_framework.settings import api_settings
 from rest_framework.permissions import BasePermission
 from rest_framework.documentation import include_docs_urls
-from typing import Type, List
+from typing import Type, List, Union
+
+from .restmodeladmin import RestModelAdmin
 
 
 class AlreadyRegistered(Exception):
@@ -25,7 +27,7 @@ class AdminSite:
         self._registry = {}
         self.admin_router = routers.DefaultRouter()
 
-    def register(self, model_or_iterable, serializer: Type[serializers.ModelSerializer] = None,
+    def register(self, model_or_iterable, serializer_or_modeladmin: Union[serializers.ModelSerializer, RestModelAdmin] = None,
                  permission_classes: List[Type[BasePermission]] = None, pagination_class=None):
         """
         Register Models to the AdminSite. Generates a serializer or uses the one passed.
@@ -41,9 +43,12 @@ class AdminSite:
             if model in self._registry:
                 raise AlreadyRegistered(f"The model {model.__name__} has already been registered")
             model_name = model.__name__
-
-            if serializer:
-                serializer_class = serializer
+            
+            if serializer_or_modeladmin and issubclass(serializer_or_modeladmin, serializers.ModelSerializer):
+                serializer_class = serializer_or_modeladmin
+            elif serializer_or_modeladmin and issubclass(serializer_or_modeladmin, RestModelAdmin):
+                self._register_restmodel_admin(model, serializer_or_modeladmin)
+                continue
             else:
                 serializer_class = type(f"{model_name}Serializer", (serializers.ModelSerializer,), {
                     'Meta': type('Meta', (object,), {
@@ -64,6 +69,31 @@ class AdminSite:
             self._registry[model] = viewset
             #
             self.admin_router.register(f"{model._meta.app_label}/{model_name}", viewset, f"admin_{model_name}")
+    
+    def _register_restmodel_admin(self, model, restmodeladmin):
+        """Register RestModelAdmin"""
+
+        self._setup_default_modeladmin(model, restmodeladmin)
+
+        self._registry[model] = restmodeladmin
+        #
+        self.admin_router.register(f"{model._meta.app_label}/{model.__name__}", restmodeladmin, f"admin_{model.__name__}")
+
+    def _setup_default_modeladmin(self, model, restmodeladmin):
+        """Check for required attributes and set defaults if not given"""
+        
+        # No queryset or get_queryset defined
+        if restmodeladmin.queryset is None and not 'get_queryset' in restmodeladmin.__dict__:
+            restmodeladmin.queryset = model.objects.all()
+        
+        # No serializer class or get_serializer_class defined
+        if restmodeladmin.serializer_class is None and not 'get_serializer_class' in restmodeladmin.__dict__:
+            restmodeladmin.serializer_class = type(f"{model.__name__}Serializer", (serializers.ModelSerializer,), {
+                'Meta': type('Meta', (object,), {
+                    'model': model,
+                    'fields': '__all__'
+                })
+            })
 
     def get_registry(self):
         return self._registry

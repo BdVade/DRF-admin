@@ -2,11 +2,14 @@ from rest_framework.test import APITestCase, override_settings, APIRequestFactor
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.settings import api_settings
+from rest_framework.serializers import ModelSerializer
 from tests.models import TestModel, TestAbstractModel, SecondTestModel
 from tests.serializers import AdminSerializer
 from tests.permissions import ReadOnly
 from tests.pagination import LargeResultsSetPagination
+from tests.restmodeladmin import TestRestModelAdmin, SecondTestRestModelAdmin
 from restadmin.sites import AdminSite, AlreadyRegistered, NotRegistered
+from restadmin import register, RestModelAdmin
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import path, reverse
 from django.contrib.auth.models import User
@@ -61,7 +64,7 @@ class TestRegistration(APITestCase):
         self.assertTrue(issubclass(self.site._registry[SecondTestModel], ModelViewSet))
 
     def test_custom_serializer_registration(self):
-        self.site.register(TestModel, serializer=AdminSerializer)
+        self.site.register(TestModel, serializer_or_modeladmin=AdminSerializer)
         self.assertEqual(self.site._registry[TestModel].serializer_class, AdminSerializer)
 
     def test_custom_permission_class_registration(self):
@@ -84,9 +87,54 @@ class TestRegistration(APITestCase):
         self.site.register(TestModel)
         self.assertEqual(self.site._registry[TestModel].pagination_class, api_settings.DEFAULT_PAGINATION_CLASS)
 
+    def test_restmodeladmin_registration(self):
+        self.site.register(TestModel, TestRestModelAdmin)
+        self.assertEqual(self.site._registry[TestModel], TestRestModelAdmin)
+
+    def test_restmodeladmin_defaults(self):
+        self.site.register(TestModel, TestRestModelAdmin)
+        # Add some data
+        for i in [10, 20, 30, 40, 50, 60]:
+            TestModel.objects.create(age=i, name=str(i))
+        self.assertQuerysetEqual(self.site._registry[TestModel].queryset, TestModel.objects.all(), ordered=False)
+        self.assertEqual(self.site._registry[TestModel].serializer_class.__name__, 'TestModelSerializer')
+
+    def test_register_decorator(self):
+        @register(TestModel, site=self.site)
+        class DecoratorRestModelAdmin(RestModelAdmin):
+            pass
+        self.assertEqual(self.site._registry[TestModel], DecoratorRestModelAdmin)
+
+    def test_register_decorator_with_serializer(self):
+        @register(TestModel, site=self.site)
+        class DecoratorSerializer(ModelSerializer):
+            class Meta:
+                model = TestModel
+                fields = ["id"]
+        
+        self.assertEqual(self.site._registry[TestModel].serializer_class, DecoratorSerializer)
+
+    def test_register_decorator_with_not_models(self):
+        with self.assertRaises(ValueError):
+            @register()
+            class Foo: pass
+
+    def test_register_decorator_with_invalid_admin_site(self):
+        with self.assertRaises(ValueError):
+            @register(TestModel, site=True)
+            class Foo: pass
+
+    def test_register_decorator_with_invalid_class(self):
+        with self.assertRaises(ValueError):
+            @register(TestModel)
+            class Foo: pass
+
+
 
 site = AdminSite()
 site.register(TestModel)
+
+register(SecondTestModel, site=site)(SecondTestRestModelAdmin)
 
 urlpatterns = [
     path("test_admin/", site.urls),
@@ -149,3 +197,34 @@ class TestViewSets(APITestCase):
         url = reverse("restadmin:admin_TestModel-detail", args=(1,))
         response = self.client.delete(url)
         self.assertEqual(TestModel.objects.count(), 0)
+
+    def test_restmodeladmin_list_objects(self):
+        # Add some data
+        for i in [10, 20, 30, 40, 50, 60]:
+            SecondTestModel.objects.create(age=i, name=str(i))
+        url = reverse("restadmin:admin_SecondTestModel-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 2)
+    
+    def test_restmodeladmin_create_model_endpoint(self):
+        url = reverse("restadmin:admin_SecondTestModel-list")
+        response = self.client.post(url, data={"name": "name", "age": 16})
+        self.assertEqual(SecondTestModel.objects.count(), 1)
+        self.assertEqual(response.status_code, 201)
+
+    def test_restmodeladmin_update_model_endpoint(self):
+        model_object = SecondTestModel.objects.create(name="name1", age=5)
+        url = reverse("restadmin:admin_SecondTestModel-detail", args=(model_object.id,))
+        response = self.client.put(url, data={"name": "name2", "age": 15})
+        new_object = SecondTestModel.objects.get(id=model_object.id)
+        self.assertEqual(new_object.age, 15)
+        self.assertEqual(new_object.name, "name2")
+
+    def test_restmodeladmin_partial_update_model_endpoint(self):
+        model_object = SecondTestModel.objects.create(name="name1", age=5)
+        url = reverse("restadmin:admin_SecondTestModel-detail", args=(model_object.id,))
+        response = self.client.patch(url, data={"age": 15})
+        new_object = SecondTestModel.objects.get(id=model_object.id)
+        self.assertEqual(new_object.age, 15)
+        

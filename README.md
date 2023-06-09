@@ -70,14 +70,39 @@ urlpatterns = [
 
 ## Customization
 This package allows you to specify the following when registering your model
-- `serializer`: A Model Serializer Class
+- `serializer_or_modeladmin`: A Model Serializer Class or a subclass of `RestModelAdmin`
 - ` permission_classes`: A list of Permission classes
 - `pagination_classs`: A Pagination Class
 
 An example of how a call to the register method with all 3 would look is :
 ```python
-restadmin.site.register(TestModel, serializer=AdminSerializer, permission_classes=[ReadOnly], 
+restadmin.site.register(TestModel, serializer_or_modeladmin=AdminSerializer, permission_classes=[ReadOnly], 
                         pagination_class=LargeResultsSetPagination)
+
+```
+
+`RestModelAdmin` expose the same interface as `ModelViewSet` so you can add the whole customizations that
+`ModelViewSet` offers. This includes:
+
+- Custom querysets
+- redifining defaults methods
+- add actions as ModelViewSet's exta actions
+
+You can also register models with the `register` decorator
+
+Example:
+```python
+from restadmin import register, RestModelAdmin
+from .models import TestModel
+
+@register(TestModel)
+class TestRestModelAdmin(RestModelAdmin):
+
+    serializer_class = MyCustomSerializer # Optional. A default is provided if None defined
+
+    def get_queryset(self):
+        queryset = TestModel.objects.filter(age__lt=30)
+        return queryset
 
 ```
 
