@@ -9,5 +9,5 @@ class RestModelAdmin(ModelViewSet):
     and using vanilla ModelViewSet. This will allow implementing
     more features in the future
     """
-    
-    permission_classes = [IsAdminUser] # By default allow admin users only
+
+    permission_classes = [IsAdminUser]  # By default allow admin users only

@@ -1,4 +1,4 @@
-from rest_framework.test import APITestCase, override_settings, APIRequestFactory, URLPatternsTestCase
+from rest_framework.test import APITestCase, override_settings
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.settings import api_settings
@@ -13,9 +13,6 @@ from restadmin import register, RestModelAdmin
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import path, reverse
 from django.contrib.auth.models import User
-from django.template.response import TemplateResponse
-from django.test.client import RequestFactory
-import pdb
 
 
 # Create your tests here.
@@ -203,6 +200,8 @@ class TestViewSets(APITestCase):
         for i in [10, 20, 30, 40, 50, 60]:
             SecondTestModel.objects.create(age=i, name=str(i))
         url = reverse("restadmin:admin_SecondTestModel-list")
+        # This gets only the ages less than 30
+        # TODO: Refactor this. It's misleading(You think it gets all instances when It get just those less than 30)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 2)

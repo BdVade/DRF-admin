@@ -1,4 +1,5 @@
 import requests
+import setuptools
 from setuptools import setup
 
 
@@ -27,7 +28,7 @@ setup(
         'Intended Audience :: Developers',  # Define that your audience are developers
         'Topic :: Software Development :: Build Tools'
     ],
-    packages=[],
+    packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=["Django>=3.2.9", "djangorestframework", "coreapi"],
     package_dir={"": "restadmin"},
